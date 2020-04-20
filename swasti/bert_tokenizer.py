@@ -1,14 +1,13 @@
 from transformers import BertModel, BertTokenizer
 import torch
 
-VOCAB_PATH = "../vocab.txt"
-
 class Tokenizer:
     def __init__(self, device):
 
         self.device = device
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.bert_model = BertModel.from_pretrained('bert-base-uncased')
+        self.bert_model.cuda()
 
     def tokenize(self, text):
         encoded_dict = self.tokenizer.encode_plus(text, add_special_tokens=True, return_tensors='pt')
@@ -17,6 +16,7 @@ class Tokenizer:
         outputs = self.bert_model(input_ids)
 
         last_hidden_states = outputs[0] 
+        print(last_hidden_states)
         last_hidden_states.squeeze(0).to(self.device)
         cls_embedding = last_hidden_states[:, 0, :].squeeze(0).to(self.device)
 

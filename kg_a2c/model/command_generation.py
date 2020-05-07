@@ -4,10 +4,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
 import os
+import sys
 import pandas as pd
 
 from sentence_tokenizer import Tokenizer
+sys.path.insert(0, '..')
 from utils import Saver
+
 _FILE_PREFIX = ''
 
 class ItemScorer:
@@ -73,17 +76,8 @@ class ItemScorerModel(nn.Module):
         # translator model for mapping from desired actions performed on ingredients to commands that the parser understands
         self.translator = CmdTranslator.initialize_trained_model(device)
 
-        # Word embedding (initialized from glove embeddings)
         self.tokenizer = Tokenizer(device=device)
         self.embedding_dim = self.tokenizer.embedding_dim
-        self.embedding = nn.Embedding(self.tokenizer.vocab_len, self.embedding_dim)
-        if self.tokenizer.embedding_init is not None:
-            self.embedding.weight = nn.Parameter(self.tokenizer.embedding_init)
-
-        # RNNs
-        self.encoder = nn.ModuleDict({
-            k: nn.GRU(self.embedding_dim, encoder_hidden_dim, batch_first=True, bidirectional=True) for k in ['recipe_directions', 'inventory']
-        })
 
         # binary classifier determining for every direction in the recipe if it is still necessary to perform it
         self.action_scorer = nn.Sequential(
@@ -102,15 +96,9 @@ class ItemScorerModel(nn.Module):
             return ((tensor == 0).type(torch.int) <= 0).sum(dim=1)
 
         def encoder(list_of_str, key):
-            """ Encodes a list of strings with the encoder specified by 'key'. """
-            tokenized = self.tokenizer.process_cmds(list_of_str, pad=True)
-            lengths = unpadded_sequence_length(tokenized)
-            embedded = self.embedding(tokenized)
-            packed_sequence = pack_padded_sequence(input=embedded,
-                                                   lengths=lengths,
-                                                   batch_first=True,
-                                                   enforce_sorted=False)
-            out, hidden = self.encoder[key](packed_sequence)
+            """ Encodes a list of strings with the bert. """
+            tokenized = self.tokenizer.encode_commands(list_of_str)
+            hidden = self.tokenizer.tokenize(tokenized)
             hidden = hidden.permute(1, 0, 2).reshape(hidden.size(1), -1)  # correct for bididrectional
             return hidden
 
@@ -214,7 +202,7 @@ class CmdTranslator(nn.Module):
 
         # determines which of the 4 utils ('knife', 'oven', 'stove', 'BBQ') needs to be used for the command
         self.util_decoder = nn.Sequential(
-            nn.Linear(in_features=encoder_hidden_dim * 2,
+            nn.Linear(in_features=self.embedding_dim,
                       out_features=linear_hidden_dim),
             # nn.Dropout(dropout),
             nn.ReLU(),
@@ -222,7 +210,7 @@ class CmdTranslator(nn.Module):
 
         # determines which of the 4 actions ('slice', 'dice', 'chop', 'cook') needs to be used for the command
         self.verb_decoder = nn.Sequential(
-            nn.Linear(in_features=encoder_hidden_dim * 2,
+            nn.Linear(in_features=self.embedding_dim,
                       out_features=linear_hidden_dim),
             # nn.Dropout(dropout),
             nn.ReLU(),

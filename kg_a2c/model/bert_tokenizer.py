@@ -7,6 +7,7 @@ class Tokenizer:
         self.device = device
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.bert_model = BertModel.from_pretrained('bert-base-uncased')
+        self.embedding_dim = 768
         self.bert_model.cuda()
 
     def tokenize(self, text):

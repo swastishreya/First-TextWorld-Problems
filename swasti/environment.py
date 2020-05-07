@@ -44,10 +44,6 @@ class Environment:
         return self.env.render()
 
     def play_manually(self):
-        # obs_array = []
-        # scores_array = []
-        # dones_array = []
-        # infos_array = []
         try:
             done = False
             self.reset()
@@ -57,19 +53,11 @@ class Environment:
                 command = input("Enter command:")
                 nb_moves += 1
                 obs, scores, dones, infos = self.step([command])
-                # obs_array.append(obs)
-                # scores_array.append(scores)
-                # dones_array.append(dones)
-                # infos_array.append(infos)
 
         except KeyboardInterrupt:
             pass
 
         print("Total {}  steps taken, scored {} points".format(nb_moves,scores[0]))
-        # print(obs_array)
-        # print(scores_array)
-        # print(dones_array)
-        # print(infos_array)
 
 
 if __name__ == "__main__":

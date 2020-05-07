@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import os
 
 # from bert_tokenizer import Tokenizer
-from sentence_tokenizer import Tokenizer
+from sentence_tokenizer import Tokenizer # using sentence BERT
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

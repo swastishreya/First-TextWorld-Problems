@@ -6,7 +6,7 @@ import os
 from time import sleep
 
 from navigator import Navigator
-from utils import flist, bcolors
+from utils import flist
 
 LearningInfo = recordclass('LearningInfo', 'score prob value action index possible_actions')
 

@@ -127,3 +127,10 @@ class Saver:
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+class flist(list):
+    def append(self, object_):
+        if isinstance(object_, list):
+            [super(flist, self).append(o) for o in object_]
+        else:
+            super(flist, self).append(object_)

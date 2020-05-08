@@ -9,7 +9,10 @@ from torch import optim
 import torch.nn.functional as F
 import torch.nn as nn
 
+from agent import HAgent
 from model.model import Model
+from model.command_generation import ItemScorer
+from model.navigation import Navigation
 from utils import count_parameters, Saver, StepCounter
 
 from typing import List, Dict, Any, Optional

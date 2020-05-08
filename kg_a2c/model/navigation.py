@@ -6,7 +6,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 import os
 
 from sentence_tokenizer import Tokenizer
-from utils import Saver, make_path
+from .utils import Saver, make_path
 _FILE_PREFIX = ''
 
 

@@ -1,6 +1,8 @@
 import os
 import glob
 import argparse
+from os import listdir
+import re
 
 from tqdm import tqdm
 
@@ -15,7 +17,7 @@ AVAILABLE_INFORMATION = EnvInfos(
     description=True, inventory=True,
     max_score=True, objective=True, entities=True, verbs=True,
     command_templates=True, admissible_commands=True,
-    has_won=True, has_lost=True,
+    # has_won=True, has_lost=True,
     extras=["recipe"]
 )
 
@@ -39,8 +41,9 @@ def train(game_files):
 
     env_id = textworld.gym.register_games(game_files, requested_infos,
                                           max_episode_steps=agent.max_nb_steps_per_episode,
+                                          batch_size=agent.batch_size,
                                           name="training")
-    env_id = textworld.gym.make_batch(env_id, batch_size=agent.batch_size, parallel=True)
+    # env_id = textworld.gym.make_batch(env_id, batch_size=agent.batch_size, parallel=True)
     env = gym.make(env_id)
 
     for epoch_no in range(1, agent.nb_epochs + 1):
@@ -50,6 +53,8 @@ def train(game_files):
         }
         for game_no in tqdm(range(len(game_files))):
             obs, infos = env.reset()
+            print("observation : ",obs)
+            print("infos : ", infos)
             agent.train()
 
             scores = [0] * len(obs)
@@ -60,6 +65,7 @@ def train(game_files):
                 steps = [step + int(not done) for step, done in zip(steps, dones)]
                 commands = agent.act(obs, scores, dones, infos)
                 obs, scores, dones, infos = env.step(commands)
+                print("obs : ", obs)
 
             # Let the agent knows the game is done.
             agent.act(obs, scores, dones, infos)
@@ -73,17 +79,15 @@ def train(game_files):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Train an agent.")
-    parser.add_argument("games", metavar="game", nargs="+",
-                       help="List of games (or folders containing games) to use for training.")
-    args = parser.parse_args()
-
+    # parser = argparse.ArgumentParser(description="Train an agent.")
+    # parser.add_argument("games", metavar="game", help="List of games (or folders containing games) to use for training.",default="../sample_games")
+    # args = parser.parse_args()
+    games_dir = listdir("../sample_games/")
     games = []
-    for game in args.games:
+    for game in games_dir:
         if os.path.isdir(game):
             games += glob.glob(os.path.join(game, "*.ulx"))
-        else:
-            games.append(game)
-
+        elif game[-3:] == "ulx" : 
+            games.append("../sample_games/"+game)
     print("{} games found for training.".format(len(games)))
     train(games)

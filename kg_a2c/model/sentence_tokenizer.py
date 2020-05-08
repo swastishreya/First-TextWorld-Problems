@@ -2,7 +2,7 @@ from sentence_transformers import SentenceTransformer
 import torch
 
 class Tokenizer:
-    def __init__(self, device): 
+    def __init__(self, device):
 
         self.device = device
         self.model = SentenceTransformer('bert-base-nli-mean-tokens')

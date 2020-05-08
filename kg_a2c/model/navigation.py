@@ -3,10 +3,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+import sys
 import os
 
 from sentence_tokenizer import Tokenizer
-from .utils import Saver, make_path
+# from .utils import Saver, make_path
+sys.path.insert(0, '..')
+from utils import Saver, make_path
 _FILE_PREFIX = ''
 
 

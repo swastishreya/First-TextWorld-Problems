@@ -119,7 +119,7 @@ class ItemScorerModel(nn.Module):
                 clnd_directions_to_encode = [d.split()[0] for d in clnd_directions]
 
             # encode the recipe directions for the current ingredient
-            encoded_directions = encoder(clnd_directions_to_encode, key='recipe_directions')
+            encoded_directions = encoder(clnd_directions_to_encode)
 
             # encode the inventory
             # remove specific ingredient name from the string for more robustness and better generalization
@@ -131,7 +131,7 @@ class ItemScorerModel(nn.Module):
                 clnd_inventory = [clnd_inventory[0]]
 
             # encode the inventory for the current ingredient
-            encoded_inventory = encoder(clnd_inventory, key='inventory')[0, :]
+            encoded_inventory = encoder(clnd_inventory)[0, :]
 
 
             # concatenate the encodings of the inventory to the encoding of every recipe direction
@@ -192,12 +192,7 @@ class CmdTranslator(nn.Module):
         # Word embedding (initialized from glove embeddings)
         self.tokenizer = Tokenizer(device=device)
         self.embedding_dim = self.tokenizer.embedding_dim
-        self.embedding = nn.Embedding(self.tokenizer.vocab_len, self.embedding_dim)
-        if self.tokenizer.embedding_init is not None:
-            self.embedding.weight = nn.Parameter(self.tokenizer.embedding_init)
-
-        # RNN to encode the input sentence
-        self.encoder = nn.GRU(self.embedding_dim, encoder_hidden_dim, batch_first=True, bidirectional=True)
+        
         self.device = device
 
         # determines which of the 4 utils ('knife', 'oven', 'stove', 'BBQ') needs to be used for the command

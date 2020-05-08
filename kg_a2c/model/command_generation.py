@@ -228,15 +228,9 @@ class CmdTranslator(nn.Module):
             return ((tensor == 0).type(torch.int) <= 0).sum(dim=1)
 
         # encode the input
-        tokenized = self.tokenizer.process_cmds(directions, pad=True)
-        lengths = unpadded_sequence_length(tokenized)
-        embedded = self.embedding(tokenized)
-        packed_sequence = pack_padded_sequence(input=embedded,
-                                               lengths=lengths,
-                                               batch_first=True,
-                                               enforce_sorted=False)
-        out, hidden = self.encoder(packed_sequence)
-        encoded = hidden.permute(1, 0, 2).reshape(hidden.size(1), -1)  # correct for bididrectional
+        tokenized = self.tokenizer.encode_commands(directions)
+        hidden = self.tokenizer.tokenize(tokenized)
+        encoded = hidden.permute(1, 0, 2).reshape(hidden.size(1), -1)  
 
         # compute the scores for the verbs and utils
         verb_distribution = self.verb_decoder(encoded)

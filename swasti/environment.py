@@ -57,6 +57,12 @@ class Environment:
                 command = input("Enter command:")
                 nb_moves += 1
                 obs, scores, dones, infos = self.step([command])
+                print(obs)
+                print(scores)
+                print(dones)
+                for k in infos:
+                    print(k)
+                    print(infos[k])
                 # obs_array.append(obs)
                 # scores_array.append(scores)
                 # dones_array.append(dones)
